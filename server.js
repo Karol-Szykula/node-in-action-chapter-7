@@ -1,10 +1,8 @@
-const connect = require('connect');
-const cookieParser = require('cookie-parser')
+const connect = require('connect')
 
 const app = connect()
-    .use(cookieParser('tobi is super animal'))
     .use(function (req, res) {
-        console.log(req.cookies);
-        console.log(req.signedCookies);
-        res.end('hello\n');
-    }).listen(3000);
+        res.setHeader('Set-Cookie', 'foo=bar')
+        res.setHeader('Set-Cookie', 'tobi=ferret; Expires=Tue, 08 Jun 2021 10:18:14GMT')
+        res.end()
+    }).listen(3000)
