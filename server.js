@@ -1,8 +1,12 @@
 const connect = require('connect')
+const bodyParser = require('body-parser');
 
 const app = connect()
-    .use(function (req, res) {
-        res.setHeader('Set-Cookie', 'foo=bar')
-        res.setHeader('Set-Cookie', 'tobi=ferret; Expires=Tue, 08 Jun 2021 10:18:14GMT')
-        res.end()
-    }).listen(3000)
+    .use(bodyPars)
+app.listen(3000)
+
+function bodyPars(req, res, next) {
+    bodyParser(req, res, next)
+    console.log('End')
+    next()
+}
