@@ -1,12 +1,15 @@
+const http = require('http')
 const connect = require('connect')
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
 
 const app = connect()
-    .use(bodyPars)
-app.listen(3000)
+    .use(bodyParser({
+        limit: '32kb'
+    }))
+    .use(hello)
 
-function bodyPars(req, res, next) {
-    bodyParser(req, res, next)
-    console.log('End')
-    next()
+http.createServer(app).listen(3000)
+
+function hello(req, res, next) {
+    console.log('Hello')
 }
