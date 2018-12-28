@@ -1,35 +1,43 @@
 
 const connect = require('connect')
 const logger = require('morgan')
-const cookieParser = require('cookie-session')
-const connectSession = require('connect-session')
 
-const session = connectSession.session
 
 const app = connect()
 
     .use(logger('dev'))
 
-    .use(cookieParser({
-        name: 'session',
-        secret: 'sec'
 
-    }))
-    .use(session())
-    .use(function (req, res, next) {
-       
-        if (req.session.views ) {
-            res.setHeader('Content-Type', 'text/html');
-            res.write('<p>Views: ' + req.session.views  + '</p>');
-            req.session.views = (req.session.views || 0) + 1
+app.use(function (req, res, next) {
+    var auth;
 
-            res.end();
-        } else {
-            req.session.views = (req.session.views || 0) + 1
-            res.end('Presentation of method session(). Refresh the page!');
-        }
+    // check whether an autorization header was send    
+    if (req.headers.authorization) {
+        // only accepting basic auth, so:
+        // * cut the starting "Basic " from the header
+        // * decode the base64 encoded username:password
+        // * split the string at the colon
+        // -> should result in an array
+        auth = new Buffer(req.headers.authorization.substring(6), 'base64').toString().split(':');
+    }
 
-        res.end(req.session.views + ' views')
-    });
+    // checks if:
+    // * auth array exists 
+    // * first value matches the expected user 
+    // * second value the expected password
+    if (!auth || auth[0] !== 'testuser' || auth[1] !== 'testpassword') {
+        // any of the tests failed
+        // send an Basic Auth request (HTTP Code: 401 Unauthorized)
+        res.statusCode = 401;
+        // MyRealmName can be changed to anything, will be prompted to the user
+        res.setHeader('WWW-Authenticate', 'Basic realm="MyRealmName"');
+        // this will displayed in the browser when authorization is cancelled
+        res.end('Unauthorized');
+    } else {
+        // continue with processing, user was authenticated
+        next();
+    }
+});
+
 
 app.listen(3000);
