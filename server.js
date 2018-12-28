@@ -1,35 +1,35 @@
-const http = require('http')
+
 const connect = require('connect')
 const logger = require('morgan')
-const bodyParser = require('body-parser')
-const methodOverride = ('method-override')
+const cookieParser = require('cookie-session')
+const connectSession = require('connect-session')
+
+const session = connectSession.session
 
 const app = connect()
 
     .use(logger('dev'))
 
-    // .use(bodyParser.urlencoded({
-    //     extended: true
-    // }))
+    .use(cookieParser({
+        name: 'session',
+        secret: 'sec'
 
-    .use(edit)
-    .use(update)
+    }))
+    .use(session())
+    .use(function (req, res, next) {
+       
+        if (req.session.views ) {
+            res.setHeader('Content-Type', 'text/html');
+            res.write('<p>Views: ' + req.session.views  + '</p>');
+            req.session.views = (req.session.views || 0) + 1
 
-http.createServer(app).listen(3000)
+            res.end();
+        } else {
+            req.session.views = (req.session.views || 0) + 1
+            res.end('Presentation of method session(). Refresh the page!');
+        }
 
+        res.end(req.session.views + ' views')
+    });
 
-function edit(req, res, next) {
-    if ('GET' !== req.method) return next()
-    res.setHeader('Content-Type', 'text/html')
-    res.write('<form method="post">')
-    res.write('<input type="hidden" name="_method" value="put" />')
-    res.write('<input type="text" name="user[name]" value="Tobi" />');
-    res.write('<input type="submit" value="Zmień" />')
-    res.write('</form>')
-    res.end()
-}
-
-function update(req, res, next) {
-    if ('PUT' != req.method) return next()
-    res.end('User name has been changed to: ' + req.body.user.name)
-}
+app.listen(3000);
